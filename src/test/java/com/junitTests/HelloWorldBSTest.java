@@ -16,8 +16,8 @@ class HelloWorldBSTest {
 
     private WebDriver driver;
     private Local bsLocal;
-    String username = "ashishkhamari_7fRXzd";
-    String key = "wyYUttrFz1baGTduGJ52";
+    String username = System.getenv("BROWSERSTACK_CLOUD_USERNAME");
+    String key = System.getenv("BROWSERSTACK_CLOUD_KEY");
 
     @BeforeEach
     public void beforeMethod(TestInfo testInfo) {
