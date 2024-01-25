@@ -1,0 +1,87 @@
+import org.codehaus.groovy.runtime.GStringImpl
+import java.text.SimpleDateFormat
+
+buildscript {
+    ext {
+        gradleVersion = '8.5'
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+plugins {
+    id "java"
+    id "idea"
+}
+version '0.0.1'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+compileJava { options.encoding = "UTF-8" }
+
+dependencies {
+    implementation "org.junit.jupiter:junit-jupiter:5.10.1"
+    implementation "org.seleniumhq.selenium:selenium-java:4.17.0"
+    implementation "com.browserstack:browserstack-local-java:1.1.0"
+}
+
+static def getCurrentDatestamp() {
+    Date today = new Date()
+    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy")
+    return df.format(today)
+}
+
+static def getCurrentTimestamp() {
+    Date today = new Date()
+    SimpleDateFormat df = new SimpleDateFormat("HH-mm-ss")
+    return df.format(today)
+}
+
+project.ext.logDir = "${rootDir}/reports/" + getCurrentDatestamp() + "/" + getCurrentTimestamp() as GStringImpl
+
+test {
+    useJUnitPlatform() {
+        reports.html.destination(new File("${project.logDir}/html"))
+
+        reports.junitXml.outputPerTestCase(true)
+        reports.junitXml.destination(new File("${project.logDir}/junit"))
+        testLogging {
+            events "started", "passed", "skipped", "failed"
+            // show standard out and standard error of the test JVM(s) on the console
+            showStandardStreams = true
+            // show full exception trace
+            exceptionFormat = 'full'
+            showStackTraces = true
+            showCauses = true
+            showExceptions = true
+        }
+        println("Log directory: ${project.logDir}")
+        println("Debug mode: " + System.getProperty('debug', 'false'))
+        // attach debugger
+        if (System.getProperty('debug', 'false') == 'true') {
+            println("In debug mode")
+            jvmArgs '-Xdebug', '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,' + 'address=*:5005'
+        }
+    }
+}
+
+clean.doFirst {
+    delete "${rootDir}/target"
+    delete "${rootDir}/bin"
+    delete "${rootDir}/build"
+    delete "${rootDir}/out"
+    println "Clean: Deleted bin, build, out, target and reports directories"
+}
+
+clean.doLast {
+    mkdir "${rootDir}/reports"
+    println "Created reports directory"
+}
+
+wrapper {
+    gradleVersion = project.gradleVersion // version from gradle.properties
+}
