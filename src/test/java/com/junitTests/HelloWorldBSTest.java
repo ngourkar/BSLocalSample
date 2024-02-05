@@ -18,12 +18,12 @@ class HelloWorldBSTest {
     private Local bsLocal;
     String username = System.getenv("BROWSERSTACK_CLOUD_USERNAME");
     String key = System.getenv("BROWSERSTACK_CLOUD_KEY");
+    String browserStackLocalIdentifier = String.valueOf(new Random().nextInt(100000));
 
     @BeforeEach
     public void beforeMethod(TestInfo testInfo) {
         System.out.println("BeforeMethod: Test: " + testInfo.getDisplayName());
         String access_key = key;
-        String browserStackLocalIdentifier = String.valueOf(new Random().nextInt(100000));
         startBrowserStackLocal(access_key, browserStackLocalIdentifier);
         driver = createBSRemoteDriver();
     }
@@ -38,11 +38,12 @@ class HelloWorldBSTest {
         bstackOptions.put("browserVersion", "latest");
         bstackOptions.put("consoleLogs", "info");
         bstackOptions.put("projectName", "bs local test");
-        bstackOptions.put("buildName", "not-set");
+        bstackOptions.put("buildName", "BSIssue");
         bstackOptions.put("sessionName", "test");
         bstackOptions.put("local", "true");
         bstackOptions.put("debug", "true");
         bstackOptions.put("networkLogs", "true");
+        bstackOptions.put("localIdentifier", browserStackLocalIdentifier);
         capabilities.setCapability("bstack:options", bstackOptions);
         ChromeOptions chromeOptions = new ChromeOptions().merge(capabilities);
         System.out.println(chromeOptions.toJson());
@@ -79,7 +80,7 @@ class HelloWorldBSTest {
         bsLocalArgs.put("localIdentifier", id);
         bsLocalArgs.put("forcelocal", "true");
         bsLocalArgs.put("verbose", "3");
-        bsLocalArgs.put("browserstack.local", "true");
+        bsLocalArgs.put("force", "true");
 
         try {
             System.out.println("Is BrowserStackLocal running? - " + bsLocal.isRunning());
